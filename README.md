@@ -13,4 +13,3 @@ python src/data/generate_data.py
 
 Output: `data/raw/clinic_patients_melbourne.csv` (1,096 rows, 2023–2025).
 
-See `CLAUDE.md` for full architecture and design notes.
