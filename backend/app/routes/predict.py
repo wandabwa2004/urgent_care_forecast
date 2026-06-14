@@ -20,7 +20,6 @@ def predict(req: PredictionRequest) -> PredictionResponse:
     log_prediction({
         "date": str(req.date),
         "predicted_patients": response.predicted_patients,
-        "staffing_tier": response.staffing_tier,
         "model_used": response.model_used,
         "temperature": req.temperature,
         "weather_type": req.weather_type,

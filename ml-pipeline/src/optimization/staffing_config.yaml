@@ -1,0 +1,52 @@
+# Staffing-optimisation assumptions for the Southbank Walk-in Clinic.
+# Every value here is an assumption a rostering manager can challenge and tune
+# without touching code. Omitted keys fall back to the coded defaults in
+# assumptions.py. All costs in AUD.
+
+# --- Opening hours (clinic open 08:00-20:00) ---
+open_hour: 8
+close_hour: 20
+
+# --- Wait-time service level ---
+# "No more than `wait_prob` of patients wait longer than `wait_target_min`
+# minutes before being seen by the relevant role."
+wait_target_min: 30
+wait_prob: 0.20
+
+# --- Utilisation cap (staff are never sized above this occupancy) ---
+target_utilisation: 0.85
+
+# --- Demand-uncertainty handling ---
+coverage: 0.90        # roster sufficient on this fraction of plausible days
+n_scenarios: 1000
+random_seed: 42
+
+# --- On-call standby trigger ---
+standby_threshold: 0.25   # flag if P95 demand > planned demand + 25%
+
+# --- Roles: service time (min/patient), hourly cost, safe-staffing floor ---
+roles:
+  - name: doctor
+    service_minutes: 15
+    hourly_cost: 150
+    min_on_duty: 1
+  - name: nurse
+    service_minutes: 10
+    hourly_cost: 65
+    min_on_duty: 1
+  - name: admin
+    service_minutes: 5
+    hourly_cost: 40
+    min_on_duty: 1
+
+# --- Rosterable shifts (6-hour blocks, overlapping over the midday peak) ---
+shifts:
+  - {name: Early, start_hour: 8,  end_hour: 14}
+  - {name: Mid,   start_hour: 11, end_hour: 17}
+  - {name: Late,  start_hour: 14, end_hour: 20}
+
+# --- Intraday arrival profile (relative weights per open hour, 08:00-19:00) ---
+# PLACEHOLDER shape: typical urgent-care curve, renormalised to sum to 1.
+# Replace with measured hourly arrivals when available.
+arrival_weights: [0.040, 0.070, 0.090, 0.100, 0.100, 0.090,
+                  0.080, 0.075, 0.080, 0.095, 0.080, 0.060]

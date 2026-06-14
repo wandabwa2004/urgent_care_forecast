@@ -29,10 +29,27 @@ class PredictionResponse(BaseModel):
     upper_80: int
     lower_95: int
     upper_95: int
-    staffing_tier: str          # Low | Medium | High
-    tier_plan: str              # Short description of staffing plan
     confidence: float
     model_used: str
+
+
+class StaffingResponse(BaseModel):
+    """Roster recommendation for a single day, sitting on top of the forecast."""
+    date: Date
+    predicted_patients: int                  # point forecast
+    planned_demand: float                    # coverage-quantile (P90) demand sized to
+    p95_demand: float
+    tail_demand: float                       # P99 bad-day scenario
+    bodies_to_roster: dict                   # role -> total shift-assignments for the day
+    peak_concurrent: dict                    # role -> most on the floor at once
+    headcount_by_shift: dict                 # shift -> {role: count}
+    daily_cost: float
+    shortfall: int                           # unmet coverage-hours (0 if fully covered)
+    achieved_sla: dict                       # role -> worst-hour P(wait > target)
+    peak_hour: int
+    standby_recommended: bool
+    solver_status: str
+    assumptions: list[dict]                  # the full, echoed assumptions register
 
 
 class HistoricalRecord(BaseModel):

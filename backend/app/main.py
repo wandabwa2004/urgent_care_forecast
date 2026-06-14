@@ -3,13 +3,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import historical, insights, predict
+from app.routes import historical, insights, predict, staffing
 from app.services.model_service import ModelService
+from app.services.staffing_service import StaffingService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     ModelService.load()
+    StaffingService.load()
     yield
 
 
@@ -29,6 +31,7 @@ app.add_middleware(
 )
 
 app.include_router(predict.router,    prefix="/api", tags=["Predictions"])
+app.include_router(staffing.router,   prefix="/api", tags=["Staffing"])
 app.include_router(historical.router, prefix="/api", tags=["Historical"])
 app.include_router(insights.router,   prefix="/api", tags=["Insights"])
 

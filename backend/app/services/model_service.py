@@ -56,7 +56,6 @@ class ModelService:
     _residual_std: float = 0.0
     _cv_residuals: np.ndarray | None = None
     _xgb_log_offset: float = 0.0
-    _tiers = {"low_max": 80, "medium_max": 150}
 
     @classmethod
     def load(cls):
@@ -65,7 +64,6 @@ class ModelService:
         cls._features = meta["features"]
         cls._best_model_name = meta["best_model"]
         cls._residual_std = float(meta.get("cv_residual_std", 25.0))
-        cls._tiers = meta.get("tiers", cls._tiers)
 
         if cls._best_model_name == "xgboost":
             cls._model = xgb.XGBRegressor()
@@ -102,14 +100,6 @@ class ModelService:
         return cls._model is not None
 
     @classmethod
-    def _tier(cls, n: float) -> tuple[str, str]:
-        if n < cls._tiers["low_max"]:
-            return "Low", "2 doctors, 3 nurses — standard roster"
-        if n <= cls._tiers["medium_max"]:
-            return "Medium", "3 doctors, 4 nurses, extra triage nurse"
-        return "High", "4+ doctors, surge protocol, ED overflow coordination"
-
-    @classmethod
     def predict(cls, feature_row: pd.DataFrame) -> dict:
         raw = cls._model.predict(feature_row)
         if cls._best_model_name == "xgboost":
@@ -124,8 +114,6 @@ class ModelService:
         lower_95 = max(0, int(point - 1.96 * std))
         upper_95 = int(point + 1.96 * std)
 
-        tier, plan = cls._tier(point)
-
         # Confidence from test R² (best-model row)
         best_row = cls._model_results.get("XGBoost") or cls._model_results.get(cls._best_model_name.title()) or {}
         r2 = float(best_row.get("R2", 0.0))
@@ -137,8 +125,6 @@ class ModelService:
             "upper_80": upper_80,
             "lower_95": lower_95,
             "upper_95": upper_95,
-            "staffing_tier": tier,
-            "tier_plan": plan,
             "confidence": round(confidence, 3),
             "model_used": cls._best_model_name,
         }
